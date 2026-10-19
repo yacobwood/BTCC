@@ -67,11 +67,13 @@
    full text line's height (~27px at this font-size/line-height) on top
    of the 14px margins already collapsing around it, making a single
    blank line between paragraphs/before a heading look enormous. Collapse
-   it to a thin spacer instead. Also applied in ArticleScreen.js's
-   buildHtml() - keep both in sync, same reasoning as the rest of this
-   block: this is real content behaviour, not just an editor-preview
-   nicety, so a stray blank paragraph in *any* published article gets the
-   same fix, not just what's visible while drafting. */
+   it to a thin spacer instead. Editor-only on purpose: Quill splits every
+   line into its own <p>, so a mid-paragraph <br> never appears here. Do
+   NOT copy this rule into ArticleScreen.js or the Preview - :only-child
+   ignores text nodes, so on published HTML it also matched
+   <p>text<br>text</p> and drew the wrapped lines on top of each other
+   (2026-10-19). sanitise()/stripEmptyParagraphs() remove empty
+   paragraphs there instead. */
 .ql-editor p:has(> br:only-child) { min-height: 0; line-height: 0.3; margin: 0; }
 </style>
 <script>
@@ -3908,7 +3910,6 @@ function openArticleWebPreview(article, content) {
     .content { padding:0 16px; }
     img { width:100%; height:auto; border-radius:8px; margin:12px 0; display:block; }
     p { margin-bottom:14px; }
-    p:has(> br:only-child) { min-height:0; line-height:0.3; margin:0; }
     a { color:#FEBD02; text-decoration:none; }
     blockquote { border-left:3px solid #FEBD02; padding-left:14px; margin:16px 0; color:#8B949E; font-style:italic; }
     ul,ol { background:rgba(255,255,255,0.05); border-left:3px solid #FEBD02; border-radius:6px; padding:14px 14px 14px 28px; margin:16px 0; }

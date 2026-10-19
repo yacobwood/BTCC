@@ -1166,13 +1166,12 @@ export function buildHtml(article, topPad) {
       .btcc-gallery-item { margin:0; }
       .btcc-gallery-item img { margin:0; }
       p { margin-bottom:14px; }
-      /* A genuinely empty paragraph (a stray blank line left in the source
-         content, e.g. from a markdown double-newline that survived
-         conversion) otherwise renders as a full text line's height on top
-         of the margins already collapsing around it - collapses to a thin
-         spacer instead. Kept in sync with the equivalent rule in
-         admin/standings-admin.html's .ql-editor CSS. */
-      p:has(> br:only-child) { min-height:0; line-height:0.3; margin:0; }
+      /* No CSS rule for empty paragraphs: sanitise() removes them before
+         render. A "p whose only child element is a br" rule used to live
+         here, but CSS ignores text nodes there, so it also matched every real
+         paragraph with a soft line break (<p>Name said:<br>"Quote..."</p>)
+         and squashed it to line-height 0.3 - wrapped lines drew on top of
+         each other (btcc.net MINI CHALLENGE article, 2026-10-19). */
       a { color:#FEBD02; text-decoration:none; }
       blockquote { border-left:3px solid #FEBD02; padding-left:14px; margin:16px 0; color:#8B949E; font-style:italic; }
       ul,ol { padding-left:1.5em; background:rgba(255,255,255,0.05); border-left:3px solid #FEBD02; border-radius:6px; padding:14px 14px 14px 28px; margin:16px 0; }

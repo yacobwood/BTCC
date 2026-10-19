@@ -1009,6 +1009,14 @@ describe('buildHtml empty paragraph stripping', () => {
     const html = buildHtml({...BASE, content: '<p><img src="https://example.com/x.jpg"></p>'}, 0);
     expect(html).toContain('img src="https://example.com/x.jpg"');
   });
+
+  it('keeps a paragraph with a soft line break and never squashes it via CSS', () => {
+    const html = buildHtml({...BASE, content: '<p>Andy Menzies said:<br>“Following a great round.”</p>'}, 0);
+    expect(html).toContain('<p>Andy Menzies said:<br>“Following a great round.”</p>');
+    // p:has(> br:only-child) ignores text nodes, so it matched this
+    // paragraph and set line-height:0.3 - lines drew over each other.
+    expect(html).not.toContain('br:only-child');
+  });
 });
 
 // ─── buildHtml: hub post styling ───────────────────────────────────────────
