@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Patterson's path to the 2026 Jack Sears Trophy title"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/af9d882e-986d-450d-9cff-9fdcd50f1d37.jpg"
+        }
+      ]
+    }
   }
 ]
