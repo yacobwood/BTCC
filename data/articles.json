@@ -1817,29 +1817,6 @@
     }
   },
   {
-    "id": "tin-top-tuesday-powered-by-power-maxed-donington-park-gp",
-    "slug": "tin-top-tuesday-powered-by-power-maxed-donington-park-gp",
-    "link": "https://btcc.net/tin-top-tuesday-powered-by-power-maxed-donington-park-gp/",
-    "date": "2026-08-26T00:00:00",
-    "firstSeenAt": "2026-08-26T13:13:25.350594+00:00",
-    "title": {
-      "rendered": "Tin Top Tuesday powered by Power Maxed - Donington Park GP"
-    },
-    "excerpt": {
-      "rendered": "The BTCC returned to Donington Park for the seventh event..."
-    },
-    "content": {
-      "rendered": "<p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">The BTCC returned to Donington Park for the seventh event of the year, showcasing three spectacular races plus another thrilling Qualifying race in Scotland. The GP layout proved an important weekend in the story of the 2026 campaign.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">As the season continues towards the climax of the season, take a listen to the seventh instalment of Tin Top Tuesday powered by Power Maxed, which was aired earlier this week (Tuesday, 25 August).</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">The podcast opened with none other than Adam Morgan (CPRL), as the Lancastrian returned as the opening guest after taking two wins over the weekend, becoming only the second driver to take three victories this year. The #33 has also been the top scorer over the previous two events, taking 120 points out of a possible 152 over the two events.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">Lewis Gilbert (WSR) was the next guest on the show, speaking on his first-lap crash that saw the BMW 330i M Sport roll. The young Scot also spoke on his first three events in tin top racing and the adjustments he has had to make after racing single-seaters.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">Alan Hyde also caught up with Sam Riches (BTCC Technical Director) to discuss how the rules are designed so that incidents like Gilbert's mean drivers walk away unscathed. Ryan Bensley (Speedworks Corolla Racing) was next on the show talking about how 'tough' the championship is. The Tin Top Tuesday debutant takes us behind the scenes of his racing life that has brought him to become a BTCC driver.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">BTCC returnee Daniel Lloyd made a shock appearance after not expecting to race in 2026. The Huddersfield racer spoke on his unfortunate weekend, after a gear lever snapped in practice and the car caught fire in the second race on Sunday. Mark Tyler was the final guest of the show, someone who has worked with the TOCA Safety team since 2003.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">The 2026 Kwik Fit British Touring Car Championship grid heads to Croft (5/6 September) for the annual visit to the Yorkshire venue for the seventh race weekend of the campaign.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">Listen to the full show below...</span></span></p><div class=\"wp-block-custom-html\" data-html=\"&lt;iframe src=&quot;https://www.buzzsprout.com/1065916/episodes/19702390-listen-again-tin-top-tuesday-season-19-ep07-25th-august-2026?client_source=small_player&amp;iframe=true&quot; loading=&quot;lazy&quot; width=&quot;100%&quot; height=&quot;200&quot; frameborder=&quot;0&quot; scrolling=&quot;no&quot; title='Official British Touring Car Championship Podcasts &amp; Interviews, Listen Again! - Tin Top Tuesday - Season 19 EP07 - 25th August 2026'&gt;&lt;/iframe&gt;\" data-custom-html-hydrated=\"true\"><iframe src=\"https://www.buzzsprout.com/1065916/episodes/19702390-listen-again-tin-top-tuesday-season-19-ep07-25th-august-2026?client_source=small_player&amp;iframe=true\" loading=\"lazy\" width=\"100%\" height=\"200\" frameborder=\"0\" scrolling=\"no\" title=\"Official British Touring Car Championship Podcasts &amp; Interviews, Listen Again! - Tin Top Tuesday - Season 19 EP07 - 25th August 2026\"></iframe></div>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/Hyde-7B1A1444-scaled-e1744302022677.jpg"
-        }
-      ]
-    }
-  },
-  {
     "id": "frustrating-donington-park-weekend-for-team-vertu",
     "slug": "frustrating-donington-park-weekend-for-team-vertu",
     "link": "https://btcc.net/frustrating-donington-park-weekend-for-team-vertu/",
@@ -1858,6 +1835,29 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/6a15ff04-6869-4d83-9ca8-02ab66a71da5-Ingram-KY2A1003-1-.jpg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tin-top-tuesday-powered-by-power-maxed-donington-park-gp",
+    "slug": "tin-top-tuesday-powered-by-power-maxed-donington-park-gp",
+    "link": "https://btcc.net/tin-top-tuesday-powered-by-power-maxed-donington-park-gp/",
+    "date": "2026-08-26T00:00:00",
+    "firstSeenAt": "2026-08-26T13:13:25.350594+00:00",
+    "title": {
+      "rendered": "Tin Top Tuesday powered by Power Maxed - Donington Park GP"
+    },
+    "excerpt": {
+      "rendered": "The BTCC returned to Donington Park for the seventh event..."
+    },
+    "content": {
+      "rendered": "<p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">The BTCC returned to Donington Park for the seventh event of the year, showcasing three spectacular races plus another thrilling Qualifying race in Scotland. The GP layout proved an important weekend in the story of the 2026 campaign.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">As the season continues towards the climax of the season, take a listen to the seventh instalment of Tin Top Tuesday powered by Power Maxed, which was aired earlier this week (Tuesday, 25 August).</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">The podcast opened with none other than Adam Morgan (CPRL), as the Lancastrian returned as the opening guest after taking two wins over the weekend, becoming only the second driver to take three victories this year. The #33 has also been the top scorer over the previous two events, taking 120 points out of a possible 152 over the two events.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">Lewis Gilbert (WSR) was the next guest on the show, speaking on his first-lap crash that saw the BMW 330i M Sport roll. The young Scot also spoke on his first three events in tin top racing and the adjustments he has had to make after racing single-seaters.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">Alan Hyde also caught up with Sam Riches (BTCC Technical Director) to discuss how the rules are designed so that incidents like Gilbert's mean drivers walk away unscathed. Ryan Bensley (Speedworks Corolla Racing) was next on the show talking about how 'tough' the championship is. The Tin Top Tuesday debutant takes us behind the scenes of his racing life that has brought him to become a BTCC driver.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">BTCC returnee Daniel Lloyd made a shock appearance after not expecting to race in 2026. The Huddersfield racer spoke on his unfortunate weekend, after a gear lever snapped in practice and the car caught fire in the second race on Sunday. Mark Tyler was the final guest of the show, someone who has worked with the TOCA Safety team since 2003.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">The 2026 Kwik Fit British Touring Car Championship grid heads to Croft (5/6 September) for the annual visit to the Yorkshire venue for the seventh race weekend of the campaign.</span></span></p><p><span data-style-type=\"textColor\" data-value=\"rgb(64, 64, 64)\" data-editable=\"\"><span data-style-type=\"backgroundColor\" data-value=\"rgb(255, 255, 255)\" data-editable=\"\">Listen to the full show below...</span></span></p><div class=\"wp-block-custom-html\" data-html=\"&lt;iframe src=&quot;https://www.buzzsprout.com/1065916/episodes/19702390-listen-again-tin-top-tuesday-season-19-ep07-25th-august-2026?client_source=small_player&amp;iframe=true&quot; loading=&quot;lazy&quot; width=&quot;100%&quot; height=&quot;200&quot; frameborder=&quot;0&quot; scrolling=&quot;no&quot; title='Official British Touring Car Championship Podcasts &amp; Interviews, Listen Again! - Tin Top Tuesday - Season 19 EP07 - 25th August 2026'&gt;&lt;/iframe&gt;\" data-custom-html-hydrated=\"true\"><iframe src=\"https://www.buzzsprout.com/1065916/episodes/19702390-listen-again-tin-top-tuesday-season-19-ep07-25th-august-2026?client_source=small_player&amp;iframe=true\" loading=\"lazy\" width=\"100%\" height=\"200\" frameborder=\"0\" scrolling=\"no\" title=\"Official British Touring Car Championship Podcasts &amp; Interviews, Listen Again! - Tin Top Tuesday - Season 19 EP07 - 25th August 2026\"></iframe></div>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/Hyde-7B1A1444-scaled-e1744302022677.jpg"
         }
       ]
     }
@@ -3622,28 +3622,6 @@
     }
   },
   {
-    "id": "have-your-say-in-the-btcc-fan-survey",
-    "slug": "have-your-say-in-the-btcc-fan-survey",
-    "link": "https://btcc.net/have-your-say-in-the-btcc-fan-survey/",
-    "date": "2026-06-19T00:00:00",
-    "title": {
-      "rendered": "Have your say in the BTCC Fan Survey"
-    },
-    "excerpt": {
-      "rendered": "We want to hear from you, the fans, across the..."
-    },
-    "content": {
-      "rendered": "<p>We want to hear from you, the fans, across the UK and beyond to help us better understand the championship's audience, interests and experiences. Your feedback will play an important role in shaping future fan engagement initiatives across the Kwik Fit British Touring Car Championship.</p><p>By taking part in the 2026 BTCC Fan Survey, you\u2019ll be entered into a prize draw to win one of 20 pairs of tickets to a BTCC race weekend of your choice!</p>\n\n\n\n<p><a href=\"/survey/\">Click here</a> to take the survey now for your chance to win.</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/d2daf14c-4fe1-478f-a1e6-a9d533070345-UOB-0T9A1422-1-scaled-e1781865128740.jpg"
-        }
-      ]
-    }
-  },
-  {
     "id": "doble-in-a-great-place-as-independent-drivers-leader-during-the-mid-season-break",
     "slug": "doble-in-a-great-place-as-independent-drivers-leader-during-the-mid-season-break",
     "link": "https://btcc.net/doble-in-a-great-place-as-independent-drivers-leader-during-the-mid-season-break/",
@@ -3661,6 +3639,28 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/fbaa68dc-217d-4c81-9b4d-742b64f7d09f-doble-011A5836.jpg-scaled-e1781872591767.jpg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "have-your-say-in-the-btcc-fan-survey",
+    "slug": "have-your-say-in-the-btcc-fan-survey",
+    "link": "https://btcc.net/have-your-say-in-the-btcc-fan-survey/",
+    "date": "2026-06-19T00:00:00",
+    "title": {
+      "rendered": "Have your say in the BTCC Fan Survey"
+    },
+    "excerpt": {
+      "rendered": "We want to hear from you, the fans, across the..."
+    },
+    "content": {
+      "rendered": "<p>We want to hear from you, the fans, across the UK and beyond to help us better understand the championship's audience, interests and experiences. Your feedback will play an important role in shaping future fan engagement initiatives across the Kwik Fit British Touring Car Championship.</p><p>By taking part in the 2026 BTCC Fan Survey, you\u2019ll be entered into a prize draw to win one of 20 pairs of tickets to a BTCC race weekend of your choice!</p>\n\n\n\n<p><a href=\"/survey/\">Click here</a> to take the survey now for your chance to win.</p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/d2daf14c-4fe1-478f-a1e6-a9d533070345-UOB-0T9A1422-1-scaled-e1781865128740.jpg"
         }
       ]
     }
