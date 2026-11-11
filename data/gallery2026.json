@@ -209,6 +209,17 @@
       "capturedCount": 69,
       "totalCount": 69,
       "complete": true
+    },
+    {
+      "slug": "2026-toca-awards",
+      "title": "2026 - TOCA Awards",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/d934b23d-0810-4cac-85d5-6b9c7da57820/67119406-9484-4bd7-b5dc-285cfedce9a6/variants/thumb-gallery-editor-client-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 54,
+      "totalCount": 54,
+      "complete": true
     }
   ]
 }
