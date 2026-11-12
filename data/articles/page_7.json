@@ -386,6 +386,28 @@
     }
   },
   {
+    "id": "7-eleven-tom-chilton",
+    "slug": "7-eleven-tom-chilton",
+    "link": "https://btcc.net/7-eleven-tom-chilton/",
+    "date": "2026-07-22T00:00:00",
+    "title": {
+      "rendered": "7-Eleven: Tom Chilton"
+    },
+    "excerpt": {
+      "rendered": "Continuing the 7-Eleven series, we turn to one of the..."
+    },
+    "content": {
+      "rendered": "<p>Continuing the 7-Eleven series, we turn to one of the 11 different drivers to reach the podium so far in 2026: Team VERTU's Tom Chilton. Now in his 20th BTCC season and with well over 500 race starts to his name, the #3 Hyundai i30 Fastback N picked up his solitary podium of the campaign so far at Snetterton.</p><p><strong>Snetterton 300</strong></p><p>Chilton kept himself firmly in the podium picture throughout Sunday's Race 2, running strongly in the leading pack and always within touching distance of the rostrum. With teammate Ricky Collard (Team VERTU) already through to second after a move around the outside of Dan Cammish (NAPA Racing UK) into Brundle on lap eight, Chilton pounced at the same spot a lap later, this time up the inside, showing the pace and racecraft to make the move stick and complete a Team VERTU two-three, his first top-three finish of the 2026 season.</p><figure class=\"wp-block-embed wp-block-embed-youtube\" data-url=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\"><iframe src=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\" title=\"YouTube video\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share\"></iframe></figure><p>Chilton sits just outside the top ten in the Drivers' Championship as the mid-season break comes to a close, with the grid back in action at Thruxton (25/26 July) this weekend.</p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112621-112622-chilton-0H5A7184-1-scaled-e1784728852898.jpg"
+        }
+      ]
+    }
+  },
+  {
     "id": "expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton",
     "slug": "expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton",
     "link": "https://btcc.net/expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton/",
@@ -425,28 +447,6 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112610-112611-Shedden-D81_6284-scaled-e1784710818890.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "pm-junior-championship-prototype-set-for-public-debut-at-thruxton-btcc-weekend",
-    "slug": "pm-junior-championship-prototype-set-for-public-debut-at-thruxton-btcc-weekend",
-    "link": "https://btcc.net/pm-junior-championship-prototype-set-for-public-debut-at-thruxton-btcc-weekend/",
-    "date": "2026-07-22T00:00:00",
-    "title": {
-      "rendered": "PM Junior Championship prototype set for public debut at Thruxton BTCC weekend"
-    },
-    "excerpt": {
-      "rendered": "Visitors to this weekend\u2019s Kwik Fit British Touring Car Championship..."
-    },
-    "content": {
-      "rendered": "<p>Visitors to this weekend\u2019s Kwik Fit British Touring Car Championship event at Thruxton will have the opportunity to see the prototype PM Junior Championship car in person for the very first time.</p><p>Marking another significant milestone in the build-up to the inaugural 2027 season, the championship will showcase both the prototype race car and its M-Sport engine, giving prospective drivers, families, teams and fans an exclusive first look at Britain\u2019s newest junior racing series.</p><p>The PM Junior Championship display will be located in front of the Thruxton Centre, where members of the championship team will be on hand throughout the weekend to answer questions and provide information on the series, including driver eligibility, technical specifications, running costs and the opportunities available for young drivers looking to take the next step in their motorsport careers.</p><p>Designed for drivers aged 14-17, the PM Junior Championship has been created to provide a clear, professional and cost-controlled pathway into circuit racing. Competing on the support bill of the Kwik Fit British Touring Car Championship, the series combines high-performance machinery with a controlled technical specification to deliver close, competitive racing while keeping costs manageable.</p><p>The prototype on display features the core elements that will define the championship car, including an M-Sport developed engine, a Quaife sequential gearbox and differential package, and a Cosworth electronics system, all supplied by technical partners with extensive experience at the highest levels of motorsport.</p><p>Visitors interested in learning more about the PM Junior Championship are encouraged to visit the display throughout the weekend, where the team will be available to discuss the championship, the car and the opportunities available to prospective drivers, teams and commercial partners.</p><p>Looking ahead, preparations are also underway for the prototype to make its first public on-track demonstration during a Kwik Fit British Touring Car Championship event later this season, giving fans the opportunity to see and hear the car in action ahead of the championship\u2019s debut in 2027.</p><p>For championship and commercial enquiries during the Thruxton weekend, representatives from the PM Junior Championship team will be available throughout the event.</p><p><strong>Interested in learning more?</strong></p><p>Prospective drivers, parents, teams and commercial partners are invited to visit the PM Junior Championship display throughout the weekend or arrange a dedicated meeting with the championship team.</p><p>To book a meeting or register your interest, visit the PM Junior Championship <a href=\"https://forms.office.com/pages/responsepage.aspx?id=SMixCc4-4Um51o3deY9Kn3d0MBnUTEROl0pFZpqhfKtUOFdRT0pKRkRWTVNTVEkyTkE5ODlSUjlRNS4u&amp;route=shorturl\" target=\"_blank\" rel=\"noopener noreferrer\" data-inline-content-type=\"link\">here</a> and fill in the available form.</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112624-112625-Thruxton-0Q3A4321-1-scaled-e1784732227471.jpg"
         }
       ]
     }
