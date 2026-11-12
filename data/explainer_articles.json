@@ -185,13 +185,10 @@
       "imageLicense": "CC BY-SA 2.0",
       "category": "Regs Explained",
       "source": "btcc hub",
-      "status": "draft",
+      "status": "published",
       "scheduledDate": "2026-11-10",
-      "pubDate": null,
-      "order": 9,
-      "previewDeviceIds": [
-        "pUI1L8INKZMwjplh0So54Wb7FGk2"
-      ]
+      "pubDate": "2026-11-12T17:46",
+      "order": 9
     },
     {
       "id": "explainer-brakes",
