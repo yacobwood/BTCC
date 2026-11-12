@@ -466,7 +466,8 @@
       "status": "staged",
       "scheduledDate": "2026-11-13",
       "pubDate": null,
-      "order": 10
+      "order": 10,
+      "accepted": true
     },
     {
       "id": "explainer-parc-ferme",
