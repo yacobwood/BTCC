@@ -307,7 +307,8 @@
       "status": "staged",
       "scheduledDate": "2026-11-20",
       "pubDate": null,
-      "order": 12
+      "order": 12,
+      "accepted": true
     },
     {
       "id": "explainer-noise-control",
