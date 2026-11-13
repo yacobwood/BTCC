@@ -11,19 +11,10 @@
       "source": "btcc-hub",
       "sourceUrl": "https://www.bbc.co.uk/news/articles/cmkgv95x93kno",
       "pubDate": "2026-11-13T08:13",
-      "status": "draft",
-      "aiDraft": true,
+      "status": "published",
       "aiBrief": "News article on the theft of Power Maxed Racing's Dexter Patterson Audi from ExCeL London and the team's £25,000 reward, from the BBC report. Written in a Claude Code session.",
       "aiSourceUrls": [
         "https://www.bbc.co.uk/news/articles/cmkgv95x93kno"
-      ],
-      "aiNotes": [
-        "Every fact and quote comes from the BBC report by Tim Race and Alex McIntyre (12 Nov 2026). All quotes were checked word for word against it. Some are trimmed to partial quotes so they avoid a comma before \"and\" or a three-item list.",
-        "The break-in details (how many got in and how they took the trailer) and the ExCeL \"crisis meeting\" are Weaver's account of what he was told. Neither ExCeL nor the police has confirmed them.",
-        "The four-car Knockhill line comes from the Hub's own August digests. The 2026 wins and Patterson's 14th place and podium come from standings.json. None of that is in the BBC piece.",
-        "Check the car has not been recovered before publishing. No other outlet had the story indexed on 13 Nov.",
-        "Hero image is the app's own Patterson car cutout (data/carImages/patterson.webp) on a plain dark backdrop. It shows the 2026 race livery, which may not match how the car looked when it was stolen.",
-        "\"ExCeL London\" uses the venue's own styling. The BBC spells it two different ways."
       ]
     },
     {
