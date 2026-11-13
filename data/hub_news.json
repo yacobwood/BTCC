@@ -1,6 +1,32 @@
 {
   "posts": [
     {
+      "id": "hub-1794557581063",
+      "title": "Thieves Take Patterson's Audi From ExCeL London as Power Maxed Offers £25,000 Reward",
+      "description": "Thieves towed Dexter Patterson's Audi out of a secure compound at ExCeL London on Wednesday night and Power Maxed Racing is offering £25,000 for its safe return.",
+      "content": "<h2>Gone Overnight</h2><p>Thieves have stolen one of Power Maxed Racing's cars. Dexter Patterson's Audi went missing from a compound at ExCeL London on the night of Wednesday 11 November and team principal Adam Weaver puts its value at about £350,000. The Studley-based team is now offering a £25,000 reward for information that leads to its safe return.</p><p>The car was only in London to help other people out. Power Maxed took it to the venue for filming and promotional work, attending free of charge to support people trying to promote motorsport. \"It was something we were doing in kindness,\" Weaver told BBC Hereford and Worcester. \"We've gone to do that and we've lost something very significant.\"</p><h2>How They Took It</h2><p>The Audi went into a trailer that was locked in ExCeL's secure car park overnight. Weaver says he was told three people got into the site. They broke the gate locks from the inside and brought in a vehicle. Then they simply towed the trailer away with the car still inside.</p><p>Weaver says he was told ExCeL is holding a \"crisis meeting\" and that police told him they would send officers to inspect the site. The Metropolitan Police told the BBC it does not comment on individual incidents of car crime. ExCeL had not responded to the BBC when its report went out.</p><h2>Useless to the Thieves</h2><p>This is what makes it so maddening. Weaver reckons the car is \"almost worthless to anybody else\" because \"all of the parts on it are very bespoke to the championship and you won't be able to use them in other championships\". Most of what the car costs is the time it took to build. Weaver puts that at about 600 hours.</p><p>The team is insured but Weaver would far rather have the car back than start again. \"We don't really want to be spending another 600 hours building another one if we can help it,\" he said. Hard to blame him.</p><h2>Not Again</h2><p>This is the last thing Power Maxed needed. Fifteen months ago a fire at the team's former base in Bretforton near Evesham destroyed its cars and its headquarters. Weaver admits the theft has him asking questions. \"It does start to make you wonder why you do certain things,\" he said. \"You get people asking if the universe is trying to tell us something. I mean, what is the universe trying to tell me?\"</p><p>From the outside the answer looks pretty clear. This team rebuilt from scratch after the fire and came back \"showing that we never give up\" as Weaver put it. By the first anniversary of the fire it was running four cars at Knockhill. Across 2026 Mikey Doble won twice and Aiden Moffat won once. Patterson finished 14th in the standings with a podium of his own. A stolen trailer should not define the team's winter.</p><h2>Can You Help?</h2><p>The £25,000 reward is for information that leads to the car's safe recovery. If you know anything, message Power Maxed Racing privately through the team's Facebook page. Seen a BTCC Audi on a trailer where it shouldn't be? Speak up and let's get Patterson's car home.</p>",
+      "imageUrl": "",
+      "images": [],
+      "category": "News",
+      "source": "btcc-hub",
+      "sourceUrl": "https://www.bbc.co.uk/news/articles/cmkgv95x93kno",
+      "pubDate": "2026-11-13T08:13",
+      "status": "draft",
+      "aiDraft": true,
+      "aiBrief": "News article on the theft of Power Maxed Racing's Dexter Patterson Audi from ExCeL London and the team's £25,000 reward, from the BBC report. Written in a Claude Code session.",
+      "aiSourceUrls": [
+        "https://www.bbc.co.uk/news/articles/cmkgv95x93kno"
+      ],
+      "aiNotes": [
+        "Every fact and quote comes from the BBC report by Tim Race and Alex McIntyre (12 Nov 2026). All quotes were checked word for word against it. Some are trimmed to partial quotes so they avoid a comma before \"and\" or a three-item list.",
+        "The break-in details (how many got in and how they took the trailer) and the ExCeL \"crisis meeting\" are Weaver's account of what he was told. Neither ExCeL nor the police has confirmed them.",
+        "The four-car Knockhill line comes from the Hub's own August digests. The 2026 wins and Patterson's 14th place and podium come from standings.json. None of that is in the BBC piece.",
+        "Check the car has not been recovered before publishing. No other outlet had the story indexed on 13 Nov.",
+        "No image added. The BBC photos are copyright, so use a Power Maxed or Patterson image the app can use.",
+        "\"ExCeL London\" uses the venue's own styling. The BBC spells it two different ways."
+      ]
+    },
+    {
       "id": "digest-2026-11-09",
       "title": "BTCC Digest - 2026-11-09",
       "description": "",
