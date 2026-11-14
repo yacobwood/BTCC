@@ -11,20 +11,11 @@
       "source": "btcc-hub",
       "sourceUrl": "https://www.touringcartimes.com/2026/11/13/power-maxed-racing-btcc-audi-recovered-after-theft/",
       "pubDate": "2026-11-14T09:49",
-      "status": "draft",
-      "aiDraft": true,
+      "status": "published",
       "aiBrief": "Power maxed car has been found",
       "aiSourceUrls": [
         "https://www.touringcartimes.com/2026/11/13/power-maxed-racing-btcc-audi-recovered-after-theft/"
-      ],
-      "aiNotes": [
-        "The source does not say how, where or by whom the car was found. I deliberately left this out. The line suggesting the publicity made the car 'too hot to hold onto' is my opinion, not a reported fact.",
-        "The source does not say whether anyone claimed or received the £25,000 reward. The article does not address this.",
-        "The source gives the theft as 'Wednesday evening' and the recovery as 'last night', relative to a team statement made 'this morning'. No exact dates appear, so I avoided them. Please confirm the timing if you want to add dates.",
-        "I paraphrased the team's thanks to the Motorsport Expo and the sharers of the appeal rather than quoting the full sentence. All quoted words match the TouringCarTimes source.",
-        "The source names the car as an Audi A3 Saloon. Per house style, the article calls it 'the Audi' or 'the car'."
-      ],
-      "previewDeviceIds": []
+      ]
     },
     {
       "id": "hub-1794557581063",
