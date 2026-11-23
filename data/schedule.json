@@ -217,41 +217,6 @@
         {
           "name": "Free Practice",
           "day": "SAT",
-          "time": "11:00"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:05"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:45"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:45"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ]
-    },
-    {
-      "round": 8,
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
           "time": "10:15"
         },
         {
@@ -278,6 +243,41 @@
           "name": "Race 3",
           "day": "SUN",
           "time": "17:15"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "11:00"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:05"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:45"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     },
