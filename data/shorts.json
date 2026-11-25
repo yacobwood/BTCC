@@ -1,6 +1,16 @@
 {
-  "updatedAt": "2026-11-18T18:20:35Z",
+  "updatedAt": "2026-11-25T19:32:38Z",
   "shorts": [
+    {
+      "videoId": "0Lb-0nEGxzc",
+      "url": "https://www.youtube.com/shorts/0Lb-0nEGxzc",
+      "thumbnailUrl": "https://i.ytimg.com/vi/0Lb-0nEGxzc/hqdefault.jpg"
+    },
+    {
+      "videoId": "AN88yyoR8tk",
+      "url": "https://www.youtube.com/shorts/AN88yyoR8tk",
+      "thumbnailUrl": "https://i.ytimg.com/vi/AN88yyoR8tk/hqdefault.jpg"
+    },
     {
       "videoId": "CEwcDbC0ngA",
       "url": "https://www.youtube.com/shorts/CEwcDbC0ngA",
@@ -40,11 +50,6 @@
       "videoId": "A44y3jeGiYQ",
       "url": "https://www.youtube.com/shorts/A44y3jeGiYQ",
       "thumbnailUrl": "https://i.ytimg.com/vi/A44y3jeGiYQ/hqdefault.jpg"
-    },
-    {
-      "videoId": "fvYuXG8rSGc",
-      "url": "https://www.youtube.com/shorts/fvYuXG8rSGc",
-      "thumbnailUrl": "https://i.ytimg.com/vi/fvYuXG8rSGc/hqdefault.jpg"
     }
   ]
 }
